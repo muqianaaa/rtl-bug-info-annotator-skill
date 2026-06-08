@@ -4,7 +4,7 @@ An installable skill for generating the `bug_desc` and `fix_hint` fields in
 RTL bug benchmark annotations.
 
 The skill is designed for Codex and Claude Code workflows that annotate
-Verilog/SystemVerilog/Chisel bug-fix cases from evidence:
+Verilog/SystemVerilog bug-fix cases from evidence:
 
 - RTL module specification
 - PR title and body
@@ -12,8 +12,8 @@ Verilog/SystemVerilog/Chisel bug-fix cases from evidence:
 - fix commit message
 - raw unified diff or selected raw diff hunks
 
-This skill packages the Section 6 workflow for writing concise bug descriptions
-and high-level repair suggestions from the collected benchmark evidence.
+This skill packages a workflow for writing concise bug descriptions and
+high-level repair suggestions from the collected benchmark evidence.
 
 ## What It Produces
 
