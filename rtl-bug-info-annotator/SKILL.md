@@ -1,6 +1,6 @@
 ---
 name: rtl-bug-info-annotator
-description: Generate and review only the bug_desc and fix_hint fields for RTL benchmark bug_info annotations from hardware bug-fix evidence such as RTL specs, PR titles/bodies, issues, commit messages, and raw unified diffs. Use when Codex or Claude Code needs to annotate Verilog/SystemVerilog/Chisel bug-fix cases, produce concise evidence-grounded bug descriptions and repair hints, avoid patch leakage, or decide whether evidence is insufficient.
+description: Generate and review the bug_desc and fix_hint fields for RTL benchmark bug_info annotations from hardware bug-fix evidence such as RTL specs, PR titles/bodies, issues, commit messages, and raw unified diffs. Use when Codex or Claude Code needs to annotate Verilog/SystemVerilog/Chisel bug-fix cases, produce concise evidence-grounded bug descriptions and repair hints, avoid patch leakage, or decide whether evidence is insufficient.
 ---
 
 # RTL Bug Info Annotator
@@ -16,7 +16,7 @@ Use this skill to turn a real RTL bug-fix case into the benchmark fields:
 }
 ```
 
-The goal is not to write a repair patch or locate exact buggy lines. The goal is only Section 6 of the benchmark workflow: produce concise, evidence-supported `bug_desc` and `fix_hint` text fields that explain the bug scenario, failure, approximate root-cause scope, and high-level repair direction without leaking full patch code.
+This skill packages Section 6 of the benchmark workflow: produce concise, evidence-supported `bug_desc` and `fix_hint` text fields that explain the bug scenario, failure, approximate root-cause scope, and high-level repair direction without leaking full patch code.
 
 ## Inputs
 
