@@ -1,10 +1,11 @@
-# RTL Bug Info Annotator Skill
+# RTL Bug Info Annotator
 
-An installable skill for generating the `bug_desc` and `fix_hint` fields in
+A reproducible toolchain for generating `bug_desc` and `fix_hint` fields in
 RTL bug benchmark annotations.
 
-The skill is designed for Codex and Claude Code workflows that annotate
-Verilog/SystemVerilog bug-fix cases from evidence:
+The toolchain uses fixed prompt templates, explicit model parameters, and
+JSON/JSONL input-output files. It is intended for Verilog/SystemVerilog
+bug-fix cases with collected evidence:
 
 - RTL module specification
 - PR title and body
@@ -12,80 +13,99 @@ Verilog/SystemVerilog bug-fix cases from evidence:
 - fix commit message
 - raw unified diff or selected raw diff hunks
 
-This skill packages a workflow for writing concise bug descriptions and
-high-level repair suggestions from the collected benchmark evidence.
-
-## What It Produces
-
-```json
-{
-  "bug_desc": "2-4 evidence-supported sentences.",
-  "fix_hint": "1-2 high-level repair suggestion sentences."
-}
-```
-
-If the evidence is insufficient:
-
-```json
-{
-  "status": "needs_review",
-  "reason": "insufficient evidence"
-}
-```
-
-## Install For Codex
-
-Copy the skill directory into your Codex skills directory:
-
-```bash
-mkdir -p ~/.codex/skills
-cp -R rtl-bug-info-annotator ~/.codex/skills/
-```
-
-On Windows PowerShell:
-
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills"
-Copy-Item -Recurse -Force ".\rtl-bug-info-annotator" "$env:USERPROFILE\.codex\skills\"
-```
-
-## Install For Claude Code
-
-Install as a user-level Claude Code skill:
-
-```bash
-mkdir -p ~/.claude/skills
-cp -R rtl-bug-info-annotator ~/.claude/skills/
-```
-
-Or install into a project:
-
-```bash
-mkdir -p .claude/skills
-cp -R rtl-bug-info-annotator .claude/skills/
-```
-
-## Usage
-
-Ask the agent:
+## Repository Layout
 
 ```text
-Use $rtl-bug-info-annotator to generate bug_desc and fix_hint from this RTL bug-fix case JSON.
+prompts/
+  generate_bug_info.txt
+  review_bug_info.txt
+scripts/
+  generate_bug_info.py
+  review_bug_info.py
+  validate_case.py
+examples/
+  case.jsonl
+  generated.jsonl
 ```
 
-The expected input JSON shape is documented in
-`rtl-bug-info-annotator/SKILL.md`.
+## Input Format
 
-## Validation Helper
+Each case is a JSON object. Inputs may be a single JSON object, a JSON array, or
+JSONL with one case per line.
 
-The skill includes a small validator:
+```json
+{
+  "id": "case-id",
+  "repo": "owner/repo",
+  "lang": "sv",
+  "rtl_files": ["rtl/example.sv"],
+  "spec": "module behavior specification",
+  "pr_title": "PR title",
+  "pr_body": "PR body",
+  "commit_message": "fix commit message",
+  "issue_text": "",
+  "patch_text": "raw unified diff or selected raw diff hunks"
+}
+```
+
+`patch_text` should be raw unified diff text or selected raw diff hunks.
+
+## Validate Cases
 
 ```bash
-python rtl-bug-info-annotator/scripts/validate_bug_info_case.py case.json
+python scripts/validate_case.py examples/case.jsonl
 ```
 
-It checks required case fields and verifies that `patch_text` looks like raw
-unified diff text rather than a natural-language patch summary.
+## Generate Annotations
+
+The scripts call an OpenAI-compatible Chat Completions endpoint.
+
+```bash
+export OPENAI_API_KEY="..."
+python scripts/generate_bug_info.py examples/case.jsonl outputs/generated.jsonl \
+  --model gpt-4.1 \
+  --temperature 0 \
+  --top-p 1
+```
+
+For a custom compatible endpoint:
+
+```bash
+python scripts/generate_bug_info.py examples/case.jsonl outputs/generated.jsonl \
+  --base-url https://api.openai.com/v1 \
+  --model gpt-4.1 \
+  --temperature 0 \
+  --top-p 1
+```
+
+Each output line records:
+
+- input case id
+- generated annotation JSON
+- model name
+- base URL
+- decoding parameters
+- prompt SHA-256
+
+## Review Annotations
+
+```bash
+python scripts/review_bug_info.py examples/case.jsonl outputs/generated.jsonl outputs/reviewed.jsonl \
+  --model gpt-4.1 \
+  --temperature 0 \
+  --top-p 1
+```
+
+## Prompt Reproducibility
+
+Prompt templates are stored as plain text under `prompts/`. Do not edit prompts
+between runs unless the run is intentionally a new experiment. The scripts store
+the prompt hash in every output record so result files can be matched to the
+exact prompt version used.
+
+LLM APIs can still change model weights or serving behavior over time. To make
+runs auditable, always record the model name, base URL, prompt hash, input file,
+date, and decoding parameters.
 
 ## License
 
