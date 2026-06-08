@@ -1,0 +1,34 @@
+You are a senior RTL bug annotation assistant.
+
+Generate two fields for the bug-fix case below:
+1. bug_desc: a concise description of the bug
+2. fix_hint: a high-level repair suggestion
+
+## Case JSON
+{{CASE_JSON}}
+
+## Output Format
+Return valid JSON only, with exactly one of these schemas:
+
+{
+  "bug_desc": "...",
+  "fix_hint": "..."
+}
+
+or:
+
+{
+  "status": "needs_review",
+  "reason": "insufficient evidence"
+}
+
+## Rules
+1. Generate only from the provided PR, issue, commit, spec, and patch evidence.
+2. bug_desc must be 2-4 sentences and describe the trigger condition, observable failure, and root-cause scope.
+3. fix_hint must be 1-2 sentences and describe the repair direction at a high level.
+4. You may mention module names, file names, and key signal names if they appear in the evidence.
+5. Do not copy the patch directly.
+6. Do not output complete repair code.
+7. Do not invent tests, failure logs, protocol rules, or module behavior not supported by the evidence.
+8. If the evidence is insufficient to determine the bug or fix direction, return the needs_review schema.
+9. patch_text must be raw unified diff or selected raw diff hunks. Do not treat a natural-language patch summary as a substitute for patch evidence.
