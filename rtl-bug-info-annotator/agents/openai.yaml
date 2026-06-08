@@ -1,4 +1,0 @@
-interface:
-  display_name: "RTL Bug Info Annotator"
-  short_description: "Generate evidence-grounded RTL bug_desc and fix_hint JSON."
-  default_prompt: "Use $rtl-bug-info-annotator to generate bug_desc and fix_hint from PR, issue, commit, spec, and unified diff evidence."
